@@ -4,35 +4,26 @@ from .models import Category, Product, Review
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ["id", "text", "stars"]
+        fields = 'id text stars product'.split()
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ["id", "title", "description", "price", "category"]
+        fields = 'id title description price category'.split()
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    reviews = ReviewSerializer(many=True, read_only=True)
+    rating = serializers.FloatField()
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = 'id title description price category reviews rating'.split()
+
 
 class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = "__all__"
-
-class CategoryWithCountSerializer(serializers.ModelSerializer):
-    products_count = serializers.IntegerField()
+    products_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Category
-        fields = ["id", "name", "products_count"]
+        fields = 'id name products_count'.split()
 
 
-class ProductReviewSerializer(serializers.ModelSerializer):
-    reviews = ReviewSerializer(many=True)
-    rating = serializers.FloatField()
-
-    class Meta:
-        model = Product
-        fields = ["id", "title", "reviews", "rating"]
