@@ -27,3 +27,12 @@ class CategoryWithCountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ["id", "name", "products_count"]
+
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    reviews = ReviewSerializer(many=True)
+    rating = serializers.FloatField()
+
+    class Meta:
+        model = Product
+        fields = ["id", "title", "reviews", "rating"]

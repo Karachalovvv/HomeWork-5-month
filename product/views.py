@@ -12,6 +12,7 @@ from .serializers import (
     ProductSerializer,
     ProductDetailSerializer,
     ReviewSerializer,
+    ProductReviewSerializer,
 )
 
 @api_view(["GET"])
@@ -58,3 +59,26 @@ def review_detail_api_view(request, id):
         return Response({"error": "Review not found"}, status=404)
     serializer = ReviewSerializer(review)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def product_reviews_list_api_view(request):
+    products = Product.objects.prefetch_related("reviews").all()
+    result = []
+
+    for product in products:
+        reviews = product.reviews.all()
+        rating = reviews.aggregate(avg=Avg("stars"))["avg"] or 0
+        serializer = ProductReviewSerializer(product, context={"rating": rating})
+        result.append({
+            "id": product.id,
+            "title": product.title,
+            "reviews": ReviewSerializer(reviews, many=True).data,
+            "rating": round(rating, 2)
+        })
+
+    average_rating = Review.objects.aggregate(avg=Avg("stars"))["avg"] or 0
+    return Response({
+        "average_rating": round(average_rating, 2),
+        "products": result
+    })
